@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { QueryClient, dehydrate } from "@tanstack/react-query";
 import fs from "fs/promises";
 import path from "path";
 import express from "express";
@@ -66,6 +67,14 @@ async function createServer(isProd = process.env.NODE_ENV === "production") {
       let productionBuildPath = path.join(__dirname, "./dist/server/entry-server.mjs");
       let devBuildPath = path.join(__dirname, "./src/client/entry-server.tsx");
       const { render } = await vite.ssrLoadModule(isProd ? productionBuildPath : devBuildPath);
+
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60,
+          },
+        },
+      });
 
       // 4. render the app HTML. This assumes entry-server.js's exported `render`
       //    function calls appropriate framework SSR APIs,
